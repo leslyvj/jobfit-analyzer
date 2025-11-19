@@ -1,0 +1,11 @@
+streamlit
+sentence-transformers
+faiss-cpu
+rank-bm25
+pypdf
+httpx
+pandas
+numpy
+plotly
+tqdm
+nest-asyncio
