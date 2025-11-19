@@ -1,4 +1,3 @@
-````markdown
 # AI-Powered Resume Ranking System
 
 A lightweight, local-first tool that helps compare multiple resumes against a job description.  
