@@ -17,6 +17,8 @@ from rank_bm25 import BM25Okapi
 import faiss
 from dataclasses import dataclass
 import plotly.express as px
+import google.generativeai as genai
+from mistralai import Mistral
 
 # -------------------------
 # Basic logging
@@ -41,8 +43,16 @@ class Weights:
 
 @dataclass
 class PipelineConfig:
-    llm_model: str = "llama3.2:3b-instruct-q4_K_M"
-    llm_base_url: str = "http://127.0.0.1:11434"
+    # task-specific LLM models
+    llm_model_job: str = "gemini-1.5-pro"
+    llm_model_resume: str = "gemini-1.5-pro"
+    llm_model_skill: str = "mistral-small-latest"
+    llm_model_explain: str = "gemini-1.5-flash"
+
+    # legacy fields kept so rest of code compiles (not used directly now)
+    llm_model: str = "gemini-1.5-flash"
+    llm_base_url: str = ""
+
     embed_model: str = "BAAI/bge-large-en-v1.5"
     embed_batch: int = 32
     weights: Weights = Weights()
@@ -268,7 +278,7 @@ You are a JSON extractor. From the job posting text below extract a JSON object 
 Return only valid JSON. Text:
 \"\"\"{text}\"\"\"
 """
-    raw = call_llm(prompt, model=cfg.llm_model, timeout=90)
+    raw = call_llm_gemini(prompt, model=cfg.llm_model_resume, timeout=90)
     parsed = safe_json_extract(raw)
     raw_tiers = {
         "must": parsed.get("must", parsed.get("must_have", [])) or [],
@@ -632,7 +642,7 @@ Write a short, job-specific review (3–5 sentences) as if you were giving feedb
 4. Mention the overall fit score (0–1) and confidence level ({confidence}) in a natural way.
 Avoid boilerplate phrases and be concise.
 """
-    human_text = call_llm(prompt, model=cfg.llm_model, timeout=45)
+    human_text = call_llm_gemini(prompt, model=cfg.llm_model_explain, timeout=45)
     structured_out = {
         "strengths": strengths,
         "gaps": gaps,
@@ -669,7 +679,6 @@ def rank_hybrid(job: Dict[str, Any], resumes: List[Dict[str, Any]], cfg: Pipelin
         bm_raw = bm25.get_scores(job_tokens)
     else:
         bm_raw = [0.0] * len(resumes)
-    bm_norm = normalize_scores(bm_raw)
     skill_raw, domain_raw, exp_raw, rec_raw, proj_raw, edu_raw, meta_raw = [], [], [], [], [], [], []
     for r in resumes:
         structured = r.get("structured", {})
