@@ -15,7 +15,7 @@ from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer, util
 from rank_bm25 import BM25Okapi
 import faiss
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import plotly.express as px
 import google.generativeai as genai
 from mistralai import Mistral
@@ -69,19 +69,11 @@ class Weights:
 
 @dataclass
 class PipelineConfig:
-    # task-specific LLM models
-    llm_model_job: str = "gemini-1.5-pro"
-    llm_model_resume: str = "gemini-1.5-pro"
-    llm_model_skill: str = "mistral-small-latest"
-    llm_model_explain: str = "gemini-1.5-flash"
-
-    # legacy fields kept so rest of code compiles (not used directly now)
-    llm_model: str = "gemini-1.5-flash"
-    llm_base_url: str = ""
-
+    llm_model: str = "llama3.2:3b-instruct-q4_K_M"
+    llm_base_url: str = "http://127.0.0.1:11434"
     embed_model: str = "BAAI/bge-large-en-v1.5"
     embed_batch: int = 32
-    weights: Weights = Weights()
+    weights: Weights = field(default_factory=Weights)
     bm25_min_doc_freq: int = 1
 
 cfg = PipelineConfig()
