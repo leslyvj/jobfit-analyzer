@@ -20,6 +20,32 @@ import plotly.express as px
 import google.generativeai as genai
 from mistralai import Mistral
 
+GENAI_MODELS = {}
+MISTRAL_CLIENT = None
+
+def get_mistral_client():
+    global MISTRAL_CLIENT
+    if MISTRAL_CLIENT is None:
+        api_key = MISTRAL_API_KEY
+        if not api_key:
+            raise RuntimeError("MISTRAL_API_KEY missing in secrets")
+        MISTRAL_CLIENT = Mistral(api_key=api_key)
+    return MISTRAL_CLIENT
+
+def call_llm_gemini(prompt: str, model: str, timeout: int = 60) -> str:
+    try:
+        if model not in GENAI_MODELS:
+            api_key = GOOGLE_API_KEY
+            if not api_key:
+                raise RuntimeError("GOOGLE_API_KEY missing in secrets")
+            genai.configure(api_key=api_key)
+            GENAI_MODELS[model] = genai.GenerativeModel(model)
+        resp = GENAI_MODELS[model].generate_content(prompt)
+        return (getattr(resp, "text", "") or "").strip()
+    except Exception as e:
+        logger.error("[Gemini %s] call failed: %s", model, e)
+        return ""
+
 # -------------------------
 # Basic logging
 # -------------------------
