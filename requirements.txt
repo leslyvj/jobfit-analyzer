@@ -9,3 +9,5 @@ numpy
 plotly
 tqdm
 nest-asyncio
+google-generativeai
+mistralai
