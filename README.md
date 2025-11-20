@@ -1,8 +1,10 @@
-````markdown
 # AI-Powered Resume Ranking System
+
+![AI-Powered Resume-Job Matching Workflow](assets/workflow.png)
 
 A lightweight, local-first tool that helps compare multiple resumes against a job description.  
 It uses a blend of LLM extraction, semantic similarity, keyword matching, and skill-based scoring to rank candidates in a clear and explainable way.
+
 
 ---
 
